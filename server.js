@@ -3,7 +3,7 @@ const dgram = require('dgram');
 const server = dgram.createSocket('udp4');
 const functions = require('./functions.js');
 const settings = require('./settings.json');
-let blackList = [];
+let blackList=[];
 const sendAllowMsg = async (localReq, dnsRequest, linfo) => {
     const upstreamResponse = await functions.getRemoteDnsResponseBin(localReq, settings.upstreamDNSServer.address, 53);
     server.send(upstreamResponse, linfo.port, linfo.address);
@@ -29,19 +29,22 @@ const sendDenyMsg = (dnsRequest, linfo) => {
             domainName: question.domainName,
             type: 1,
             class: 1,
-            ttl: 2,
+            ttl: 1,
             rdlength: 4,
             rdata_bin: functions.ip4StringToBuffer('0.0.0.0'),
             IPv4: '0.0.0.0'
         }]
     }
     const responseBuf = functions.composeDnsMessageBin(localDnsResponse);
-    blackList.push({name: question.domainName, time: Date.now()})
     server.send(responseBuf, linfo.port, linfo.address);
 }
 const msgCb = async (localReq, linfo) => {
     const dnsRequest = functions.parseDnsMessageBytes(localReq);
     const question = dnsRequest.questions[0];
+    if (settings.staticBlackList.filter(record=>record===question.domainName).length){
+        sendDenyMsg(dnsRequest, linfo);
+        return;
+    }
     if (question.domainName.indexOf('googlevideo.com') >= 0) {
         const blackListItem = blackList.filter(record => record.name === question.domainName)
         if (blackListItem.length) {
@@ -52,10 +55,10 @@ const msgCb = async (localReq, linfo) => {
             else {
                 await sendAllowMsg(localReq,dnsRequest, linfo);
                 console.log('Allow: ' + question.domainName + " deleting record from blacklist");
-                blackList = blackList.filter(record => record.name !== question.domainName)
+                blackList = blackList.filter(record => record.name !== question.domainName);
             }
         } else {
-            blackList.push({name: question.domainName, time: Date.now()})
+            blackList.push({name: question.domainName, time: Date.now()});
             console.log('Deny: ' + question.domainName + " adding record to blacklist");
             sendDenyMsg(dnsRequest, linfo);
         }
