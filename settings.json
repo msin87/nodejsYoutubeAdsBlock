@@ -6,7 +6,7 @@
   "upstreamDNSServer": {
     "address": "192.168.1.254"
   },
-  "allowTimeMs": 500,
+  "allowTimeMs": 5000,
   "staticBlackList": [
     "ads.doubleclick.net",
     "s.ytimg.com",
@@ -50,6 +50,7 @@
     "www.googletagservices.com",
     "fwmrm.net",
     "innovid.com",
-    "2mdn.net"
+    "2mdn.net",
+    "tpc.googlesyndication.com"
   ]
 }

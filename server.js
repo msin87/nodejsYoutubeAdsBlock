@@ -29,7 +29,7 @@ const sendDenyMsg = (dnsRequest, linfo) => {
             domainName: question.domainName,
             type: 1,
             class: 1,
-            ttl: 1,
+            ttl: 2,
             rdlength: 4,
             rdata_bin: functions.ip4StringToBuffer('0.0.0.0'),
             IPv4: '0.0.0.0'
@@ -42,6 +42,7 @@ const msgCb = async (localReq, linfo) => {
     const dnsRequest = functions.parseDnsMessageBytes(localReq);
     const question = dnsRequest.questions[0];
     if (settings.staticBlackList.filter(record=>record===question.domainName).length){
+        console.log('Deny static: ' + question.domainName)
         sendDenyMsg(dnsRequest, linfo);
         return;
     }
