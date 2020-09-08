@@ -6,7 +6,7 @@
   "upstreamDNSServer": {
     "address": "192.168.1.254"
   },
-  "allowTimeMs": 5000,
+  "allowTimeMs": 100,
   "staticBlackList": [
     "ads.doubleclick.net",
     "s.ytimg.com",
